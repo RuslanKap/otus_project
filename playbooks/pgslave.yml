@@ -1,0 +1,6 @@
+- name: install postgres 14 and set up replication
+  hosts: pgslave
+  become: yes
+  roles:
+   - install_postgres
+   - postgres_replication

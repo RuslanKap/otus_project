@@ -1,0 +1,3 @@
+---
+# defaults file for grafana-prometheus
+url: 'https://api.telegram.org/bot7066751695:AAEyk6OCxGXEvoa9RYZcCRHg9UGuvzmTGSY/sendMessage?chat_id=-4271774583={{ .CommonAnnotations.summary }}'

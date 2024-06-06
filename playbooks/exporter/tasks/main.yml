@@ -1,0 +1,52 @@
+---
+- name: Download Nginx exporter
+  get_url:
+    url: https://github.com/nginxinc/nginx-prometheus-exporter/releases/download/v1.2.0/nginx-prometheus-exporter_1.2.0_linux_amd64.tar.gz
+    dest: /tmp/nginx-prometheus-exporter.tar.gz
+  when: (ansible_hostname == "nginx")
+
+- name: Extract Nginx exporter
+  unarchive:
+    src: /tmp/nginx-prometheus-exporter.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+  when: (ansible_hostname == "nginx")
+
+- name: Create Nginx exporter service file
+  template:
+    src: templates/nginx_exporter.service.j2
+    dest: /etc/systemd/system/nginx_exporter.service
+  when: (ansible_hostname == "nginx")
+
+- name: Enable and start Nginx exporter
+  systemd:
+    name: nginx_exporter
+    state: started
+    enabled: yes
+  when: (ansible_hostname == "nginx")
+
+- name: Download node exporter
+  get_url:
+    url: https://github.com/prometheus/node_exporter/releases/download/v1.2.2/node_exporter-1.2.2.linux-amd64.tar.gz
+    dest: /tmp/node_exporter.tar.gz
+  when: (ansible_hostname == "app")
+
+- name: Extract Docker exporter
+  unarchive:
+    src: /tmp/node_exporter.tar.gz
+    dest: /usr/local/bin
+    remote_src: yes
+  when: (ansible_hostname == "app")
+
+- name: Create Docker exporter service file
+  template:
+    src: templates/docker_exporter.service.j2
+    dest: /etc/systemd/system/docker_exporter.service
+  when: (ansible_hostname == "app")
+
+- name: Enable and start Docker exporter
+  systemd:
+    name: docker_exporter
+    state: started
+    enabled: yes
+  when: (ansible_hostname == "app")

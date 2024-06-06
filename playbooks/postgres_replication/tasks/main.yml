@@ -1,0 +1,135 @@
+---
+# tasks file for postgres_replication
+
+- name: Обновление всех пакетов
+  apt:
+    update_cache: yes
+
+
+- name: install base tools
+  apt:
+    name:
+      - python3-pexpect
+      - python3-psycopg2
+      - acl
+    state: present
+    update_cache: true
+
+    #Остановливаем postgresql-14 на хосте pgslave
+- name: stop postgresql-server on pgslave
+  service:
+    name: postgresql@14-main.service
+    state: stopped
+  when: (ansible_hostname == "pgslave")
+
+#Копиуем конфигурационный файл postgresql.conf
+- name: copy postgresql.conf
+  template:
+    src: postgresql.conf.j2
+    dest: /etc/postgresql/14/main/postgresql.conf
+    owner: postgres
+    group: postgres
+    mode: '0600'
+  when: (ansible_hostname == "pgmaster")
+
+#Копиуем конфигурационный файл pg_hba.conf
+- name: copy pg_hba.conf
+  template:
+    src: pg_hba.conf.j2
+    dest: /etc/postgresql/14/main/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: '0600'
+  when: (ansible_hostname == "pgmaster")
+#Перезапускаем службу  postgresql-14
+- name: restart postgresql-server on pgmaster
+  service:
+    name: postgresql@14-main.service
+    state: restarted
+  when: (ansible_hostname == "pgmaster")
+
+#Удаляем содержимое каталога /var/lib/pgsql/14/data/
+- name: Remove files from data catalog
+  file:
+    path: /var/lib/postgresql/14/main/
+    state: absent
+  when: (ansible_hostname == "pgslave")
+
+#Копируем данные с pgmaster на pgslave
+- name: copy files from master to slave
+  become_user: postgres
+  expect:
+    command: 'pg_basebackup -h 192.168.56.13 -U  replication -p 5432 -D /var/lib/postgresql/14/main/ -R -P'
+    responses:
+      '.*Password*': "{{ replicator_password }}"
+  when: (ansible_hostname == "pgslave")
+
+#Копируем конфигурационный файл postgresql.conf
+- name: copy postgresql.conf
+  become_user: postgres
+  template:
+    src: postgresql.conf.j2
+    dest: /etc/postgresql/14/main/postgresql.conf
+    owner: postgres
+    group: postgres
+    mode: '0600'
+  when: (ansible_hostname == "pgslave")
+
+#Копируем конфигурационный файл pg_hba.conf
+- name: copy pg_hba.conf
+  template:
+    src: pg_hba.conf.j2
+    dest: /etc/postgresql/14/main/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: '0600'
+  when: (ansible_hostname == "pgslave")
+
+#Запускаем службу postgresql-14 на хосте pgslave
+- name: start postgresql-server on pgslave
+  service:
+    name: postgresql@14-main.service
+    state: started
+  when: (ansible_hostname == "pgslave")
+
+#CREATE USER replicator WITH REPLICATION Encrypted PASSWORD 'Otus2022!';
+- name: Create replicator user
+  become: yes
+  become_user: postgres
+  become_method: sudo
+  postgresql_user:
+    name: replication
+    password: '{{ replicator_password }}'
+    role_attr_flags: REPLICATION
+  ignore_errors: true
+  when: (ansible_hostname == "pgmaster")
+
+  # Пароль для postgres
+- name: Set password for PostgreSQL user
+  become: yes
+  become_user: postgres
+  become_method: sudo
+  postgresql_user:
+    name: postgres
+    password: "{{ pg_pass }}"
+  ignore_errors: true
+  when: (ansible_hostname == "pgmaster")
+
+
+- name: Create posts table
+  become: yes
+  become_user: postgres
+  postgresql_query:
+    db: postgres
+    login_user: postgres
+    login_password: "{{ pg_pass }}"
+    query: |
+      CREATE TABLE IF NOT EXISTS posts(
+        id serial PRIMARY KEY,
+        name varchar(255),
+        surname varchar(255),
+        patronymic varchar(255),
+        phone varchar(255),
+        text varchar
+      );
+  when: (ansible_hostname == "pgmaster")

@@ -1,0 +1,66 @@
+# playbooks/vm2.yml
+---
+- hosts: app
+  become: yes
+  roles:
+    - exporter
+  tasks:
+    - name: Обновление всех пакетов
+      apt:
+        update_cache: yes
+
+    - name: Установка необходимых пакетов
+      apt:
+        name:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+        state: present
+
+    - name: Добавление Docker GPG ключа
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Добавление Docker репозитория
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/ubuntu bionic stable"
+        state: present
+
+
+    - name: Обновление всех пакетов после добавления репозитория
+      apt:
+        update_cache: yes
+
+    - name: Установка Docker
+      apt:
+        name:
+          - docker-ce
+        state: present
+
+    - name: Установка Docker Compose
+      get_url:
+        url: "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-{{ ansible_system|lower }}-{{ ansible_architecture }}"
+        dest: /usr/local/bin/docker-compose
+        mode: '0755'
+
+    - name: Создание символической ссылки для docker-compose
+      file:
+        src: /usr/local/bin/docker-compose
+        dest: /usr/bin/docker-compose
+        state: link
+
+    - name: Копирование приложения
+      copy:
+        src: ./../app/
+        dest: /home/vagrant/app/
+        owner: vagrant
+        group: vagrant
+        mode: '0755'
+
+    - name: Запуск Docker Compose
+      command: docker-compose up -d
+      args:
+        chdir: /home/vagrant/app
+

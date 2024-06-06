@@ -1,0 +1,7 @@
+---
+- hosts: elk
+  become: yes
+  roles:
+   - elasticsearch
+   - logstash
+   - kibana

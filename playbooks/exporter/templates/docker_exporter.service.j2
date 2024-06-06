@@ -1,0 +1,11 @@
+[Unit]
+Description=Docker Prometheus Exporter
+After=network.target
+
+[Service]
+User=nobody
+ExecStart=/usr/local/bin/node_exporter-1.2.2.linux-amd64/node_exporter
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

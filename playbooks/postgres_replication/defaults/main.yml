@@ -1,0 +1,12 @@
+---
+# defaults file for postgres_replication
+
+replicator_password: 'Otus2022!'
+pg_pass: 'postgres'
+master_ip: '192.168.56.13/32'
+slave_ip: '192.168.56.14/32'
+manager_ip: '192.168.56.1/32'
+app_ip: '192.168.56.12/32'
+allow_world_readable_tmpfiles: true
+
+

@@ -1,0 +1,52 @@
+server {
+    listen 80;
+    server_name {{ domain }};
+
+    location / {
+        proxy_pass http://192.168.56.12:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+    location /publish {
+        proxy_pass http://192.168.56.12:8888;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+server {
+    listen 443 ssl;
+    server_name {{ domain }};
+
+    ssl_certificate /etc/nginx/ssl/selfsigned.crt;
+    ssl_certificate_key /etc/nginx/ssl/selfsigned.key;
+
+    location / {
+        proxy_pass http://192.168.56.12:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+        location /publish {
+        proxy_pass http://192.168.56.12:8888;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+server {
+    listen 127.0.0.1:8080;
+
+    location /stub_status {
+        stub_status;
+        allow 127.0.0.1;
+        deny all;
+    }
+}

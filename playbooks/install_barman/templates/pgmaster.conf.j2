@@ -1,0 +1,21 @@
+[pgmaster]
+#Описание задания
+description = "backup pgmaster"
+#Команда подключения к хосту pgmaster
+ssh_command = ssh postgres{{ master_ip }}
+#Команда для подключения к postgres-серверу
+conninfo = host={{ master_ip }} user=barman port=5432 dbname=postgres
+retention_policy_mode = auto
+retention_policy = RECOVERY WINDOW OF 7 days
+wal_retention_policy = main
+streaming_archiver=on
+#Указание префикса, который будет использоваться как $PATH на хосте pgmaster
+path_prefix = /usr/pgsql-14/bin/
+#настройки слота
+create_slot = auto
+slot_name = pgmaster
+#Команда для потоковой передачи от postgres-сервера
+streaming_conninfo = host={{ master_ip }} user=barman
+#Тип выполняемого бекапа
+backup_method = postgres
+archiver = off

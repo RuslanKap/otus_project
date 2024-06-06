@@ -1,0 +1,12 @@
+---
+# defaults file for install-nginx
+domain: 'otus.project.local'
+nginx_log_dir: /var/log/nginx
+nginx_access_log_format: |
+  log_format custom '$remote_addr - $remote_user [$time_local] '
+                    '"$request" $status $body_bytes_sent '
+                    '"$http_referer" "$http_user_agent"';
+nginx_access_log_file: access.log
+nginx_error_log_file: error.log
+nginx_user: filebeat
+filebeat_group: filebeat
