@@ -1,0 +1,28 @@
+---
+- name: Ensure SELinux packages are installed
+  apt:
+    name:
+      - policycoreutils
+      - selinux-utils
+      - selinux-basics
+    state: present
+    update_cache: yes
+
+- name: Install selinux-policy-default
+  apt:
+    name: selinux-policy-default
+    state: present
+
+- name: Configure SELinux to be enabled on boot
+  command: selinux-activate
+  args:
+    creates: /etc/selinux/config
+
+- name: Ensure SELinux is set to enforcing
+  selinux:
+    policy: targeted
+    state: enforcing
+
+- name: Reboot the system to apply SELinux settings
+  reboot:
+    msg: "Rebooting to enable SELinux"

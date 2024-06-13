@@ -1,0 +1,39 @@
+---
+- name: Create directory for apt keyrings
+  file:
+    path: /etc/apt/keyrings/
+    state: directory
+    mode: '0755'
+
+- name: Download Grafana GPG key
+  apt_key:
+    url: https://apt.grafana.com/gpg.key
+    state: present
+    keyring: /etc/apt/keyrings/grafana.gpg
+
+- name: Add Grafana repository
+  apt_repository:
+    repo: "deb [signed-by=/etc/apt/keyrings/grafana.gpg] https://apt.grafana.com stable main"
+    state: present
+    filename: grafana
+
+- name: Update_cache
+  apt:
+    update_cache: yes
+
+- name: Install Grafana
+  apt:
+    name: grafana
+    state: present
+
+- name: Copy Grafana datasource configuration
+  template:
+    src: grafana_datasource.yml.j2
+    dest: /etc/grafana/provisioning/datasources/datasource.yml
+  notify: Restart Grafana
+
+- name: Enable and start Grafana
+  service:
+    name: grafana-server
+    state: started
+    enabled: yes

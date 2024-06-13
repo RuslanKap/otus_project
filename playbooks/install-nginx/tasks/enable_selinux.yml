@@ -1,0 +1,46 @@
+---
+- name: Ensure SELinux packages are installed
+  apt:
+    name:
+      - policycoreutils
+      - selinux-utils
+      - selinux-basics
+      - selinux-policy-default
+    state: present
+    update_cache: yes
+
+- name: Configure SELinux to be enabled on boot
+  command: selinux-activate
+  args:
+    creates: /etc/selinux/config
+
+
+
+- name: Update SELinux config file to set SELINUX to enforcing
+  lineinfile:
+    path: /etc/selinux/config
+    regexp: '^SELINUX='
+    line: 'SELINUX=enforcing'
+
+
+- name: Allow ports 80, 443, 9113 in SELinux
+  command: semanage port -a -t http_port_t -p tcp 80; semanage port -a -t http_port_t -p tcp 443; semanage port -a -t http_port_t -p tcp 9113
+  ignore_errors: yes
+
+- name: Reboot the system to apply SELinux settings
+  reboot:
+    msg: "Rebooting to enable SELinux"
+    connect_timeout: 5
+    reboot_timeout: 600
+    pre_reboot_delay: 0
+    post_reboot_delay: 30
+
+- name: Ensure SELinux is set to enforcing
+  command: setenforce 1
+  ignore_errors: yes
+
+- name: Allow ports 80, 443, 9113 in SELinux
+  seport:
+    ports: "80,443,9113,2222"
+    proto: tcp
+    setype: http_port_t

@@ -1,6 +1,6 @@
 ---
 # tasks file for install-nginx
-- name: Обновление всех пакетов
+- name: Update apt cache
   apt:
     update_cache: yes
 
@@ -10,44 +10,64 @@
     state: present
     update_cache: yes
 
+- name: Install UFW
+  apt:
+    name: ufw
+    state: present
 
-- name: add filebeat group
+- name: Open ports 80 and 443
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - "80"
+    - "443"
+    - "9113"
+
+- name: Enable UFW
+  ufw:
+    state: enabled
+    policy: allow
+
+- name: Add filebeat group
   ansible.builtin.group:
     name: "{{ filebeat_group }}"
     state: present
 
-- name: add filebeat user
+- name: Add filebeat user
   ansible.builtin.user:
     name: "{{ nginx_user }}"
     shell: /bin/sh
     password: "*"
     group: "{{ filebeat_group }}"
-#
-#- name: Ensure nginx log directory exists
-#  file:
-#    path: "{{ nginx_log_dir }}"
-#    state: directory
-#    owner: "{{ nginx_user }}"
-#    group: "{{ nginx_user }}"
-#    mode: '0755'
+
+# Uncomment if necessary
+# - name: Ensure nginx log directory exists
+#   file:
+#     path: "{{ nginx_log_dir }}"
+#     state: directory
+#     owner: "{{ nginx_user }}"
+#     group: "{{ nginx_user }}"
+#     mode: '0755'
 
 - name: Configure Nginx logging
   template:
     src: nginx.conf.j2
     dest: /etc/nginx/nginx.conf
 
-#- name: Set permissions on existing nginx log files
-#  file:
-#    path: "{{ item }}"
-#    owner: "{{ nginx_user }}"
-#    group: "{{ nginx_user }}"
-#    mode: '0644'
-#  with_items:
-#    - "{{ nginx_log_dir }}/{{ nginx_access_log_file }}"
-#    - "{{ nginx_log_dir }}/{{ nginx_error_log_file }}"
+# Uncomment if necessary
+# - name: Set permissions on existing nginx log files
+#   file:
+#     path: "{{ item }}"
+#     owner: "{{ nginx_user }}"
+#     group: "{{ nginx_user }}"
+#     mode: '0644'
+#   with_items:
+#     - "{{ nginx_log_dir }}/{{ nginx_access_log_file }}"
+#     - "{{ nginx_log_dir }}/{{ nginx_error_log_file }}"
 
-
-- name: Создание директории для SSL сертификатов
+- name: Create directory for SSL certificates
   file:
     path: /etc/nginx/ssl
     state: directory
@@ -55,10 +75,10 @@
     group: root
     mode: '0755'
 
-- name: Генерация самоподписанного сертификата
+- name: Generate self-signed certificate
   command: openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /etc/nginx/ssl/selfsigned.key -out /etc/nginx/ssl/selfsigned.crt -subj "/CN={{ domain }}"
 
-- name: Копирование конфигурационного файла Nginx
+- name: Copy Nginx configuration file
   template:
     src: app.conf.j2
     dest: /etc/nginx/conf.d/app.conf
@@ -66,8 +86,10 @@
     group: root
     mode: '0644'
 
-- name: Запуск и включение Nginx
+- name: Reload and enable Nginx
   service:
     name: nginx
     state: reloaded
     enabled: yes
+
+#- include_tasks: enable_selinux.yml

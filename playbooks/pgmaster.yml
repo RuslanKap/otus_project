@@ -1,9 +1,9 @@
 - name: install postgres 14 and set up replication
-  hosts: pgmaster,pgslave,barman
+  hosts: pgmaster,pgslave
   become: yes
   roles:
    - install_postgres
    - postgres_replication
- #  - install_barman
+   - install_barman
 
 

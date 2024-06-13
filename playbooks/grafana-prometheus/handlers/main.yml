@@ -13,3 +13,7 @@
   service:
     name: alertmanager
     state: restarted
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: yes

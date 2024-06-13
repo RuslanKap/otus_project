@@ -8,7 +8,41 @@ input {
 	}
 }
 
-## Add your filters / logstash plugins configuration here
+filter {
+  json {
+    source => "message"
+  }
+
+  date {
+    match => ["@timestamp", "ISO8601"]
+    target => "@timestamp"
+  }
+
+  mutate {
+    convert => {
+      "body_bytes_sent" => "integer"
+      "request_time" => "float"
+      "status" => "integer"
+    }
+  }
+
+  if "_jsonparsefailure" in [tags] {
+    drop { }
+  }
+
+  mutate {
+    rename => {
+      "remote_addr" => "[nginx][remote_addr]"
+      "body_bytes_sent" => "[nginx][body_bytes_sent]"
+      "request_time" => "[nginx][request_time]"
+      "status" => "[nginx][status]"
+      "request" => "[nginx][request]"
+      "request_method" => "[nginx][request_method]"
+      "http_referrer" => "[nginx][http_referrer]"
+      "http_user_agent" => "[nginx][http_user_agent]"
+    }
+  }
+}
 
 output {
 	elasticsearch {

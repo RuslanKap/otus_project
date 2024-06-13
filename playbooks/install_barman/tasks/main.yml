@@ -18,8 +18,9 @@
       name:
         - python3-pexpect
         - python3-psycopg2
-        - bash-completion 
-        - wget 
+        - bash-completion
+        - wget
+        - acl
       state: present
       update_cache: true
 

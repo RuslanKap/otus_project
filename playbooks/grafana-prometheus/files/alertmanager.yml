@@ -1,10 +1,10 @@
-global:
-  resolve_timeout: 5m
-
-route:
-  receiver: 'telegram'
-
-receivers:
-  - name: 'telegram'
-    webhook_configs:
-      - url: 'https://api.telegram.org/bot7066751695:AAEyk6OCxGXEvoa9RYZcCRHg9UGuvzmTGSY/sendMessage?chat_id=862698302={{ .CommonAnnotations.summary }}'
+#global:
+#  resolve_timeout: 5m
+#
+#route:
+#  receiver: 'telegram'
+#
+#receivers:
+#  - name: 'telegram'
+#    webhook_configs:
+#      - url: 'https://api.telegram.org/bot7066751695:AAEyk6OCxGXEvoa9RYZcCRHg9UGuvzmTGSY/sendMessage?chat_id=862698302={{ .CommonAnnotations.summary }}'

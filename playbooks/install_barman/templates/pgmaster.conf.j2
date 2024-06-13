@@ -2,7 +2,7 @@
 #Описание задания
 description = "backup pgmaster"
 #Команда подключения к хосту pgmaster
-ssh_command = ssh postgres{{ master_ip }}
+ssh_command = ssh postgres@{{ master_ip }}
 #Команда для подключения к postgres-серверу
 conninfo = host={{ master_ip }} user=barman port=5432 dbname=postgres
 retention_policy_mode = auto

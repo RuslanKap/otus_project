@@ -6,6 +6,10 @@ filebeat.inputs:
     - /var/log/nginx/access.log*
   prospector.scanner.exclude_files: ['.gz$']
   fields_under_root: true
+  json:
+    message_key: log
+    keys_under_root: true
+    overwrite_keys: true
 
 filebeat.config.modules:
   path: ${path.config}/modules.d/*.yml

@@ -6,9 +6,8 @@ Vagrant.configure("2") do |config|
   config.vm.define "nginx" do |nginx|
     nginx.vm.hostname = "nginx"
     nginx.vm.network "private_network", ip: "192.168.56.11"
-    nginx.vm.network "forwarded_port", guest: 80, host: 80
-    nginx.vm.network "forwarded_port", guest: 443, host: 443
-#    nginx.vm.synced_folder "./nginx", "/vagrant/nginx"
+#     nginx.vm.network "forwarded_port", guest: 80, host: 80
+#     nginx.vm.network "forwarded_port", guest: 443, host: 443
     nginx.vm.provider "virtualbox" do |vb|
       vb.memory = "512"
       vb.cpus = 1

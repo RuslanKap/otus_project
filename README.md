@@ -38,7 +38,7 @@
 ### Ссылки проекта:
 
 - **Frontend**: [https://otus.project.local](https://otus.project.local)
-- **ELK (Kibana)**: [http://192.168.56.14:5601](http://192.168.56.14:5601)
+- **ELK (Kibana)**: [http://192.168.56.16:5601](http://192.168.56.14:5601)
 - **Grafana**: [http://192.168.56.17:3000/?orgId=1](http://192.168.56.17:3000/?orgId=1)
 - **Miro**: [https://miro.com/app/board/uXjVKFt4Goc=/](https://miro.com/app/board/uXjVKFt4Goc=/)
 
